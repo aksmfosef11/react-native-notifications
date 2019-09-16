@@ -7,6 +7,7 @@ import android.app.PendingIntent;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
+import android.graphics.Bitmap;
 import android.media.AudioAttributes;
 import android.net.Uri;
 import android.os.Build;
@@ -22,17 +23,19 @@ import com.wix.reactnativenotifications.core.JsIOHelper;
 import com.wix.reactnativenotifications.core.NotificationIntentAdapter;
 import com.wix.reactnativenotifications.core.ProxyService;
 
+import java.util.List;
+
 import static com.wix.reactnativenotifications.Defs.NOTIFICATION_OPENED_EVENT_NAME;
 import static com.wix.reactnativenotifications.Defs.NOTIFICATION_RECEIVED_EVENT_NAME;
 import static com.wix.reactnativenotifications.Defs.NOTIFICATION_RECEIVED_FOREGROUND_EVENT_NAME;
 
 public class PushNotification implements IPushNotification {
-
     final protected Context mContext;
     final protected AppLifecycleFacade mAppLifecycleFacade;
     final protected AppLaunchHelper mAppLaunchHelper;
     final protected JsIOHelper mJsIOHelper;
     final protected PushNotificationProps mNotificationProps;
+    final protected Bitmap largeIcon;
     final protected AppVisibilityListener mAppVisibilityListener = new AppVisibilityListener() {
         @Override
         public void onAppVisible() {
@@ -54,15 +57,16 @@ public class PushNotification implements IPushNotification {
         if (appContext instanceof INotificationsApplication) {
             return ((INotificationsApplication) appContext).getPushNotification(context, bundle, AppLifecycleFacadeHolder.get(), new AppLaunchHelper());
         }
-        return new PushNotification(context, bundle, AppLifecycleFacadeHolder.get(), new AppLaunchHelper(), new JsIOHelper());
+        return new PushNotification(context, bundle, AppLifecycleFacadeHolder.get(), new AppLaunchHelper(), new JsIOHelper(), null);
     }
 
-    protected PushNotification(Context context, Bundle bundle, AppLifecycleFacade appLifecycleFacade, AppLaunchHelper appLaunchHelper, JsIOHelper JsIOHelper) {
+    protected PushNotification(Context context, Bundle bundle, AppLifecycleFacade appLifecycleFacade, AppLaunchHelper appLaunchHelper, JsIOHelper JsIOHelper, Bitmap largeIcon) {
         mContext = context;
         mAppLifecycleFacade = appLifecycleFacade;
         mAppLaunchHelper = appLaunchHelper;
         mJsIOHelper = JsIOHelper;
         mNotificationProps = createProps(bundle);
+        this.largeIcon = largeIcon;
     }
 
     private static boolean verifyNotificationBundle(Bundle bundle) {
@@ -75,10 +79,53 @@ public class PushNotification implements IPushNotification {
 
     @Override
     public void onReceived() throws InvalidNotificationException {
-        postNotification(null);
+        NotificationData notificationData = getNotification(mNotificationProps.asBundle().getInt("AlarmType"));
+        postNotification(null, notificationData.getId(), notificationData.getName());
         notifyReceivedToJS();
         if (mAppLifecycleFacade.isAppVisible()) {
             notifiyReceivedForegroundNotificationToJS();
+        }
+    }
+
+    private NotificationData getNotification(int alarmType) {
+        CreateNotification createNotification = new CreateNotification();
+        List<NotificationData> notificationDataList = createNotification.getNofificationData();
+        switch (alarmType) {
+            /**내고민에 토닥토닥 했을 때**/
+            case 1:     //토닥토닥
+                return notificationDataList.get(0);
+            /**내고민,잡담에 답글이 달렸을 때**/
+            case 2:
+            case 16:
+                return notificationDataList.get(1);
+            /**잡담,고민에서 내 댓글에 추천 또는 답글이 달렸을 때**/
+            case 3:
+            case 4:
+            case 17:
+                return notificationDataList.get(2);
+
+            /**고민대화 알림**/
+            case 6:
+            case 7:
+            case 9:
+            case 10:
+            case 39:
+            case 40:
+            case 41:
+                return notificationDataList.get(3);
+            /**고민라디오 알림**/
+            case 22:
+            case 23:
+            case 24:
+            case 26:
+            case 27:
+            case 28:
+            case 30:
+                return notificationDataList.get(4);
+            /**단체대화방 알림**/
+
+            default:
+                return notificationDataList.get(5);
         }
     }
 
@@ -90,7 +137,8 @@ public class PushNotification implements IPushNotification {
 
     @Override
     public int onPostRequest(Integer notificationId) {
-        return postNotification(notificationId);
+        NotificationData notificationData = getNotification(mNotificationProps.asBundle().getInt("AlarmType"));
+        return postNotification(notificationId, notificationData.getId(), notificationData.getName());
     }
 
     @Override
@@ -98,9 +146,9 @@ public class PushNotification implements IPushNotification {
         return mNotificationProps.copy();
     }
 
-    protected int postNotification(Integer notificationId) {
+    protected int postNotification(Integer notificationId, String channelID, String channelName) {
         final PendingIntent pendingIntent = getCTAPendingIntent();
-        final Notification notification = buildNotification(pendingIntent);
+        final Notification notification = buildNotification(pendingIntent, channelID, channelName);
         return postNotification(notification, notificationId);
     }
 
@@ -152,24 +200,19 @@ public class PushNotification implements IPushNotification {
         return NotificationIntentAdapter.createPendingNotificationIntent(mContext, cta, mNotificationProps);
     }
 
-    protected Notification buildNotification(PendingIntent intent) {
-        return getNotificationBuilder(intent).build();
+    protected Notification buildNotification(PendingIntent intent, String channelID, String channelName) {
+        return getNotificationBuilder(intent, channelID, channelName).build();
     }
 
     protected Uri getSoundUri() {
-        return Uri.parse(ContentResolver.SCHEME_ANDROID_RESOURCE + "://" + mContext.getPackageName()  + "/raw/nagizi_sound");
+        return Uri.parse(ContentResolver.SCHEME_ANDROID_RESOURCE + "://" + mContext.getPackageName() + "/raw/nagizi_sound");
     }
 
     protected int getIcon() {
-        return mContext.getResources().getIdentifier("fcm_top_bar_icon","drawable",mContext.getPackageName());
+        return mContext.getResources().getIdentifier("fcm_top_bar_icon", "drawable", mContext.getPackageName());
     }
 
-    protected Notification.Builder getNotificationBuilder(PendingIntent intent) {
-
-
-        String CHANNEL_ID = "channel_01";
-        String CHANNEL_NAME = "Channel Name";
-
+    protected Notification.Builder getNotificationBuilder(PendingIntent intent, String CHANNEL_ID, String CHANNEL_NAME) {
         AudioAttributes audioAttributes = new AudioAttributes.Builder()
                 .setContentType(AudioAttributes.CONTENT_TYPE_SONIFICATION)
                 .setUsage(AudioAttributes.USAGE_NOTIFICATION)
@@ -177,8 +220,9 @@ public class PushNotification implements IPushNotification {
 
         final Notification.Builder notification = new Notification.Builder(mContext)
                 .setContentTitle(mNotificationProps.getTitle())
-                .setContentText(mNotificationProps.getBody())
+                .setContentText(mNotificationProps.getContent())
                 .setSmallIcon(getIcon())
+                .setLargeIcon(largeIcon)
                 .setContentIntent(intent)
                 .setDefaults(Notification.DEFAULT_ALL)
                 .setSound(getSoundUri(), audioAttributes)
@@ -213,6 +257,9 @@ public class PushNotification implements IPushNotification {
 
     protected void clearAllNotifications() {
         final NotificationManager notificationManager = (NotificationManager) mContext.getSystemService(Context.NOTIFICATION_SERVICE);
+        if (largeIcon != null) {
+            largeIcon.recycle();
+        }
         notificationManager.cancelAll();
     }
 

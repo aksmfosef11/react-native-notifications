@@ -61,7 +61,7 @@ public class PushNotificationTest {
         InitialNotificationHolder.setInstance(mock(InitialNotificationHolder.class));
 
         when(mDefaultBundle.getString(eq("title"))).thenReturn(DEFAULT_NOTIFICATION_TITLE);
-        when(mDefaultBundle.getString(eq("body"))).thenReturn(DEFAULT_NOTIFICATION_BODY);
+        when(mDefaultBundle.getString(eq("content"))).thenReturn(DEFAULT_NOTIFICATION_BODY);
         when(mDefaultBundle.clone()).thenReturn(mDefaultBundle);
 
         when(mAppLaunchHelper.getLaunchIntent(eq(mContext))).thenReturn(mLaunchIntent);
@@ -297,7 +297,7 @@ public class PushNotificationTest {
     }
 
     protected PushNotification createUUT(Bundle bundle) {
-        return new PushNotification(mContext, bundle, mAppLifecycleFacade, mAppLaunchHelper, mJsIOHelper);
+        return new PushNotification(mContext, bundle, mAppLifecycleFacade, mAppLaunchHelper, mJsIOHelper,null);
     }
 
     protected void setUpBackgroundApp() {
