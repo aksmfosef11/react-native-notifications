@@ -12,5 +12,6 @@
 
 - (void)didReceiveForegroundNotification:(UNNotification *)notification withCompletionHandler:(void (^)(UNNotificationPresentationOptions))completionHandler;
 - (void)didReceiveNotificationResponse:(UNNotificationResponse *)notificationResponse completionHandler:(void (^)())completionHandler;
+- (void)didReceiveBackgroundNotification:(NSDictionary *)notificationResponse;
 
 @end

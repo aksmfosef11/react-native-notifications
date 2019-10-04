@@ -9,6 +9,7 @@ RCT_EXPORT_MODULE();
              RNRegistrationFailed,
              RNPushKitRegistered,
              RNNotificationReceivedForeground,
+             RNNotificationReceivedBackground,
              RNNotificationOpened,
              RNPushKitNotificationReceived];
 }
@@ -20,6 +21,7 @@ RCT_EXPORT_MODULE();
     }
     return self;
 }
+
 
 + (BOOL)requiresMainQueueSetup {
     return YES;
@@ -51,6 +53,5 @@ RCT_EXPORT_MODULE();
 - (void)handleNotification:(NSNotification *)notification {
     [self sendEventWithName:notification.name body:notification.userInfo];
 }
-
 
 @end

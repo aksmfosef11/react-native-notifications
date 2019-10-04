@@ -63,4 +63,8 @@
     [_notificationEventHandler didFailToRegisterForRemoteNotificationsWithError:error];
 }
 
+- (void)didReceiveBackgroundNotification:(NSDictionary *)notification {
+    [_notificationEventHandler didReceiveBackgroundNotification:notification];
+}
+
 @end

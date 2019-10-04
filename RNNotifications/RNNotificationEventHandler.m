@@ -33,4 +33,8 @@
     [RNEventEmitter sendEvent:RNNotificationOpened body:[RNNotificationParser parseNotificationResponse:response]];
 }
 
+- (void)didReceiveBackgroundNotification:(NSDictionary *)notification{
+    [RNEventEmitter sendEvent:RNNotificationReceivedBackground body:notification];
+}
+
 @end
