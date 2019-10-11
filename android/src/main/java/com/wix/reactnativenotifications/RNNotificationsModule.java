@@ -127,19 +127,21 @@ public class RNNotificationsModule extends ReactContextBaseJavaModule implements
 
     @ReactMethod
     public void changeAlarmSetting(String alarmType, boolean isAlarm) {
+        pref = new PreferenceHolder(getReactApplicationContext());
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             String uuid = UUID.randomUUID().toString();
             NotificationManager notificationManager = (NotificationManager) getReactApplicationContext().getSystemService(Context.NOTIFICATION_SERVICE);
+            notificationManager.deleteNotificationChannel(pref.getValue(alarmType, ""));
             NotificationChannel channelMessage;
             AudioAttributes audioAttributes = new AudioAttributes.Builder()
                     .setContentType(AudioAttributes.CONTENT_TYPE_SONIFICATION)
                     .setUsage(AudioAttributes.USAGE_NOTIFICATION_RINGTONE)
                     .build();
+
             switch (alarmType) {
                 case "N_POST_CONTENT_ID":
-                    notificationManager.deleteNotificationChannel(pref.getValue(pref.N_POST_CONTENT_ID, ""));
                     pref.put(pref.N_POST_CONTENT_ID, uuid);
-                    channelMessage = new NotificationChannel(uuid, "내 글 알림", isAlarm ? NotificationManager.IMPORTANCE_HIGH : NotificationManager.IMPORTANCE_MIN);
+                    channelMessage = new NotificationChannel(uuid, "내 글 알림", isAlarm ? NotificationManager.IMPORTANCE_HIGH : NotificationManager.IMPORTANCE_NONE);
 
                     channelMessage.enableVibration(false);
                     channelMessage.setDescription("내 고민글, 잡담글에 달린 댓글에 대한 알림을 받습니다.");
@@ -151,9 +153,8 @@ public class RNNotificationsModule extends ReactContextBaseJavaModule implements
                     notificationManager.createNotificationChannel(channelMessage);
                     break;
                 case "N_POST_REPLY_ID":
-                    notificationManager.deleteNotificationChannel(pref.getValue(pref.N_POST_REPLY_ID, ""));
                     pref.put(pref.N_POST_REPLY_ID, uuid);
-                    channelMessage = new NotificationChannel(uuid, "내 댓글 알림",isAlarm ? NotificationManager.IMPORTANCE_HIGH : NotificationManager.IMPORTANCE_MIN);
+                    channelMessage = new NotificationChannel(uuid, "내 댓글 알림",isAlarm ? NotificationManager.IMPORTANCE_HIGH : NotificationManager.IMPORTANCE_NONE);
                     channelMessage.enableVibration(false);
                     channelMessage.setDescription("내 댓글에 달린 답글에 대한 알림을 받습니다.");
                     channelMessage.enableLights(true);
@@ -165,9 +166,8 @@ public class RNNotificationsModule extends ReactContextBaseJavaModule implements
                     break;
 
                 case "N_POST_TODAK_ID":
-                    notificationManager.deleteNotificationChannel(pref.getValue(pref.N_POST_TODAK_ID, ""));
                     pref.put(pref.N_POST_TODAK_ID, uuid);
-                    channelMessage = new NotificationChannel(uuid, "토닥토닥 알림",isAlarm ? NotificationManager.IMPORTANCE_HIGH : NotificationManager.IMPORTANCE_MIN);
+                    channelMessage = new NotificationChannel(uuid, "토닥토닥 알림",isAlarm ? NotificationManager.IMPORTANCE_HIGH : NotificationManager.IMPORTANCE_NONE);
                     channelMessage.enableVibration(false);
                     channelMessage.setDescription("내 고민글이 토닥토닥을 받았을 때 알림을 받습니다.");
                     channelMessage.enableLights(true);
@@ -179,9 +179,8 @@ public class RNNotificationsModule extends ReactContextBaseJavaModule implements
                     break;
 
                 case "N_TALK_ID":
-                    notificationManager.deleteNotificationChannel(pref.getValue(pref.N_TALK_ID, ""));
                     pref.put(pref.N_TALK_ID, uuid);
-                    channelMessage = new NotificationChannel(uuid, "고민 대화 1:1 알림", isAlarm ? NotificationManager.IMPORTANCE_HIGH : NotificationManager.IMPORTANCE_MIN);
+                    channelMessage = new NotificationChannel(uuid, "고민 대화 1:1 알림", isAlarm ? NotificationManager.IMPORTANCE_HIGH : NotificationManager.IMPORTANCE_NONE);
                     channelMessage.enableVibration(false);
                     channelMessage.setDescription("고민, 단체 대화와 관련된 알림을 받습니다.");
                     channelMessage.enableLights(true);
@@ -193,9 +192,8 @@ public class RNNotificationsModule extends ReactContextBaseJavaModule implements
                     break;
 
                 case "N_RADIO_ID":
-                    notificationManager.deleteNotificationChannel(pref.getValue(pref.N_RADIO_ID, ""));
                     pref.put(pref.N_RADIO_ID, uuid);
-                    channelMessage = new NotificationChannel(uuid, "고민 라디오 알림", isAlarm ? NotificationManager.IMPORTANCE_HIGH : NotificationManager.IMPORTANCE_MIN);
+                    channelMessage = new NotificationChannel(uuid, "고민 라디오 알림", isAlarm ? NotificationManager.IMPORTANCE_HIGH : NotificationManager.IMPORTANCE_NONE);
                     channelMessage.enableVibration(false);
                     channelMessage.setDescription("고민 라디오와 관련된 알림을 받습니다.");
                     channelMessage.enableLights(true);
@@ -207,9 +205,8 @@ public class RNNotificationsModule extends ReactContextBaseJavaModule implements
                     break;
 
                 case "N_OTHER_ID":
-                    notificationManager.deleteNotificationChannel(pref.getValue(pref.N_OTHER_ID, ""));
                     pref.put(pref.N_OTHER_ID, uuid);
-                    channelMessage = new NotificationChannel(uuid, "기타 알림", isAlarm ? NotificationManager.IMPORTANCE_HIGH : NotificationManager.IMPORTANCE_MIN);
+                    channelMessage = new NotificationChannel(uuid, "기타 알림", isAlarm ? NotificationManager.IMPORTANCE_HIGH : NotificationManager.IMPORTANCE_NONE);
                     channelMessage.enableVibration(false);
                     channelMessage.setDescription("");
                     channelMessage.enableLights(true);
@@ -224,39 +221,6 @@ public class RNNotificationsModule extends ReactContextBaseJavaModule implements
             }
         } else {
 
-        }
-    }
-
-    private void removeNotification(String alarmType) {
-
-    }
-
-
-    public List<NotificationData> getCreateNofificationData() {
-
-        if (pref.getValue(pref.N_POST_CONTENT_ID, "").equals("")) {
-            List<NotificationData> notificationData = new ArrayList<>();
-            String postContent = UUID.randomUUID().toString();
-            String postReply = UUID.randomUUID().toString();
-            String postTodak = UUID.randomUUID().toString();
-            String talk = UUID.randomUUID().toString();
-            String radio = UUID.randomUUID().toString();
-            String other = UUID.randomUUID().toString();
-            pref.put(pref.N_POST_CONTENT_ID, postContent);
-            pref.put(pref.N_POST_REPLY_ID, postReply);
-            pref.put(pref.N_POST_TODAK_ID, postTodak);
-            pref.put(pref.N_TALK_ID, talk);
-            pref.put(pref.N_RADIO_ID, radio);
-            pref.put(pref.N_OTHER_ID, other);
-            notificationData.add(new NotificationData(postContent, "내 글 알림", "내 고민글, 잡담글에 달린 댓글에 대한 알림을 받습니다."));
-            notificationData.add(new NotificationData(postReply, "내 댓글 알림", "내 댓글에 달린 답글에 대한 알림을 받습니다."));
-            notificationData.add(new NotificationData(postTodak, "토닥토닥 알림", "내 고민글이 토닥토닥을 받았을 때 알림을 받습니다."));
-            notificationData.add(new NotificationData(talk, "고민 대화 1:1 알림", "고민, 단체 대화와 관련된 알림을 받습니다."));
-            notificationData.add(new NotificationData(radio, "고민 라디오 알림", "고민 라디오와 관련된 알림을 받습니다."));
-            notificationData.add(new NotificationData(other, "기타 알림", ""));
-            return notificationData;
-        } else {
-            return new ArrayList<>();
         }
     }
 

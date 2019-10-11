@@ -12,6 +12,7 @@ import android.media.AudioAttributes;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
+import android.util.Log;
 
 import com.facebook.react.bridge.ReactContext;
 import com.wix.reactnativenotifications.core.AppLaunchHelper;
@@ -22,6 +23,7 @@ import com.wix.reactnativenotifications.core.InitialNotificationHolder;
 import com.wix.reactnativenotifications.core.JsIOHelper;
 import com.wix.reactnativenotifications.core.NotificationIntentAdapter;
 import com.wix.reactnativenotifications.core.ProxyService;
+import com.wix.reactnativenotifications.utils.PreferenceHolder;
 
 import java.util.List;
 
@@ -79,8 +81,9 @@ public class PushNotification implements IPushNotification {
 
     @Override
     public void onReceived() throws InvalidNotificationException {
-        NotificationData notificationData = getNotification(mNotificationProps.asBundle().getInt("AlarmType"));
-        postNotification(null, notificationData.getId(), notificationData.getName());
+        int alarmType = Integer.parseInt(mNotificationProps.asBundle().getString("AlarmType"));
+        NotificationData notificationData = getNotification(alarmType);
+        postNotification(null, notificationData.getId(), notificationData.getName(), alarmType);
         notifyReceivedToJS();
         if (mAppLifecycleFacade.isAppVisible()) {
             notifiyReceivedForegroundNotificationToJS();
@@ -88,21 +91,21 @@ public class PushNotification implements IPushNotification {
     }
 
     private NotificationData getNotification(int alarmType) {
-        CreateNotification createNotification = new CreateNotification();
+        CreateNotification createNotification = new CreateNotification(mContext);
         List<NotificationData> notificationDataList = createNotification.getNofificationData();
         switch (alarmType) {
             /**내고민에 토닥토닥 했을 때**/
             case 1:     //토닥토닥
-                return notificationDataList.get(0);
+                return notificationDataList.get(2);
             /**내고민,잡담에 답글이 달렸을 때**/
             case 2:
             case 16:
-                return notificationDataList.get(1);
+                return notificationDataList.get(0);
             /**잡담,고민에서 내 댓글에 추천 또는 답글이 달렸을 때**/
             case 3:
             case 4:
             case 17:
-                return notificationDataList.get(2);
+                return notificationDataList.get(1);
 
             /**고민대화 알림**/
             case 6:
@@ -137,8 +140,9 @@ public class PushNotification implements IPushNotification {
 
     @Override
     public int onPostRequest(Integer notificationId) {
-        NotificationData notificationData = getNotification(mNotificationProps.asBundle().getInt("AlarmType"));
-        return postNotification(notificationId, notificationData.getId(), notificationData.getName());
+        int alarmType = Integer.parseInt(mNotificationProps.asBundle().getString("AlarmType"));
+        NotificationData notificationData = getNotification(alarmType);
+        return postNotification(notificationId, notificationData.getId(), notificationData.getName(), alarmType);
     }
 
     @Override
@@ -146,9 +150,9 @@ public class PushNotification implements IPushNotification {
         return mNotificationProps.copy();
     }
 
-    protected int postNotification(Integer notificationId, String channelID, String channelName) {
+    protected int postNotification(Integer notificationId, String channelID, String channelName, int alarmType) {
         final PendingIntent pendingIntent = getCTAPendingIntent();
-        final Notification notification = buildNotification(pendingIntent, channelID, channelName);
+        final Notification notification = buildNotification(pendingIntent, channelID, channelName, alarmType);
         return postNotification(notification, notificationId);
     }
 
@@ -200,8 +204,8 @@ public class PushNotification implements IPushNotification {
         return NotificationIntentAdapter.createPendingNotificationIntent(mContext, cta, mNotificationProps);
     }
 
-    protected Notification buildNotification(PendingIntent intent, String channelID, String channelName) {
-        return getNotificationBuilder(intent, channelID, channelName).build();
+    protected Notification buildNotification(PendingIntent intent, String channelID, String channelName, int alarmType) {
+        return getNotificationBuilder(intent, channelID, channelName, alarmType).build();
     }
 
     protected Uri getSoundUri() {
@@ -212,9 +216,7 @@ public class PushNotification implements IPushNotification {
         return mContext.getResources().getIdentifier("fcm_top_bar_icon", "drawable", mContext.getPackageName());
     }
 
-    protected Notification.Builder getNotificationBuilder(PendingIntent intent, String CHANNEL_ID, String CHANNEL_NAME) {
-
-
+    protected Notification.Builder getNotificationBuilder(PendingIntent intent, String CHANNEL_ID, String CHANNEL_NAME, int alarmType) {
         final Notification.Builder notification = new Notification.Builder(mContext)
                 .setContentTitle(mNotificationProps.getTitle())
                 .setContentText(mNotificationProps.getContent())
@@ -224,31 +226,9 @@ public class PushNotification implements IPushNotification {
                 .setDefaults(Notification.DEFAULT_ALL)
                 .setAutoCancel(true);
 
-        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.LOLLIPOP) {
-            AudioAttributes audioAttributes = new AudioAttributes.Builder()
-                    .setContentType(AudioAttributes.CONTENT_TYPE_SONIFICATION)
-                    .setUsage(AudioAttributes.USAGE_NOTIFICATION)
-                    .build();
-            notification.setSound(getSoundUri(), audioAttributes);
-        }
-
-
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            AudioAttributes audioAttributes = new AudioAttributes.Builder()
-                    .setContentType(AudioAttributes.CONTENT_TYPE_SONIFICATION)
-                    .setUsage(AudioAttributes.USAGE_NOTIFICATION)
-                    .build();
-
-            NotificationChannel channel = new NotificationChannel(CHANNEL_ID,
-                    CHANNEL_NAME,
-                    NotificationManager.IMPORTANCE_HIGH);
-            channel.setSound(getSoundUri(), audioAttributes);
-
-            final NotificationManager notificationManager = (NotificationManager) mContext.getSystemService(Context.NOTIFICATION_SERVICE);
-            notificationManager.createNotificationChannel(channel);
             notification.setChannelId(CHANNEL_ID);
         }
-
         return notification;
     }
 

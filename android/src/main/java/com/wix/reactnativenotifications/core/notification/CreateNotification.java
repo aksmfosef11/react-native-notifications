@@ -8,6 +8,7 @@ import android.graphics.Color;
 import android.media.AudioAttributes;
 import android.net.Uri;
 import android.os.Build;
+import android.util.Log;
 
 import androidx.annotation.RequiresApi;
 
@@ -18,13 +19,16 @@ import java.util.List;
 import java.util.UUID;
 
 public class CreateNotification {
+    private Context context;
     private PreferenceHolder pref;
-    public CreateNotification() {
-
+    public CreateNotification(Context context) {
+        pref = new PreferenceHolder(context);
     }
 
     public CreateNotification(Context context, Uri soundUri) {
+        this.context = context;
         pref = new PreferenceHolder(context);
+
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             NotificationManager notificationManager = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
             removeNotification(notificationManager);
