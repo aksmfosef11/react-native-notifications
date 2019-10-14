@@ -9,6 +9,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.graphics.Color;
 import android.media.AudioAttributes;
+import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.util.Log;
@@ -137,17 +138,16 @@ public class RNNotificationsModule extends ReactContextBaseJavaModule implements
                     .setContentType(AudioAttributes.CONTENT_TYPE_SONIFICATION)
                     .setUsage(AudioAttributes.USAGE_NOTIFICATION_RINGTONE)
                     .build();
-
+            Uri sound = Uri.parse("android.resource://" + getReactApplicationContext().getPackageName() + "/" + R.raw.nagizi_sound);
             switch (alarmType) {
                 case "N_POST_CONTENT_ID":
                     pref.put(pref.N_POST_CONTENT_ID, uuid);
                     channelMessage = new NotificationChannel(uuid, "내 글 알림", isAlarm ? NotificationManager.IMPORTANCE_HIGH : NotificationManager.IMPORTANCE_NONE);
-
                     channelMessage.enableVibration(false);
                     channelMessage.setDescription("내 고민글, 잡담글에 달린 댓글에 대한 알림을 받습니다.");
                     channelMessage.enableLights(true);
                     channelMessage.setShowBadge(true);
-//                    channelMessage.setSound(, audioAttributes);
+                    channelMessage.setSound(sound, audioAttributes);
                     channelMessage.setLightColor(Color.GREEN);
                     channelMessage.setLockscreenVisibility(Notification.VISIBILITY_PRIVATE);
                     notificationManager.createNotificationChannel(channelMessage);
@@ -159,7 +159,7 @@ public class RNNotificationsModule extends ReactContextBaseJavaModule implements
                     channelMessage.setDescription("내 댓글에 달린 답글에 대한 알림을 받습니다.");
                     channelMessage.enableLights(true);
                     channelMessage.setShowBadge(true);
-//                    channelMessage.setSound(, audioAttributes);
+                    channelMessage.setSound(sound, audioAttributes);
                     channelMessage.setLightColor(Color.GREEN);
                     channelMessage.setLockscreenVisibility(Notification.VISIBILITY_PRIVATE);
                     notificationManager.createNotificationChannel(channelMessage);
@@ -172,7 +172,7 @@ public class RNNotificationsModule extends ReactContextBaseJavaModule implements
                     channelMessage.setDescription("내 고민글이 토닥토닥을 받았을 때 알림을 받습니다.");
                     channelMessage.enableLights(true);
                     channelMessage.setShowBadge(true);
-//                    channelMessage.setSound(, audioAttributes);
+                    channelMessage.setSound(sound, audioAttributes);
                     channelMessage.setLightColor(Color.GREEN);
                     channelMessage.setLockscreenVisibility(Notification.VISIBILITY_PRIVATE);
                     notificationManager.createNotificationChannel(channelMessage);
@@ -185,7 +185,7 @@ public class RNNotificationsModule extends ReactContextBaseJavaModule implements
                     channelMessage.setDescription("고민, 단체 대화와 관련된 알림을 받습니다.");
                     channelMessage.enableLights(true);
                     channelMessage.setShowBadge(true);
-//                    channelMessage.setSound(, audioAttributes);
+                    channelMessage.setSound(sound, audioAttributes);
                     channelMessage.setLightColor(Color.GREEN);
                     channelMessage.setLockscreenVisibility(Notification.VISIBILITY_PRIVATE);
                     notificationManager.createNotificationChannel(channelMessage);
@@ -198,7 +198,7 @@ public class RNNotificationsModule extends ReactContextBaseJavaModule implements
                     channelMessage.setDescription("고민 라디오와 관련된 알림을 받습니다.");
                     channelMessage.enableLights(true);
                     channelMessage.setShowBadge(true);
-//                    channelMessage.setSound(, audioAttributes);
+                    channelMessage.setSound(sound, audioAttributes);
                     channelMessage.setLightColor(Color.GREEN);
                     channelMessage.setLockscreenVisibility(Notification.VISIBILITY_PRIVATE);
                     notificationManager.createNotificationChannel(channelMessage);
@@ -211,7 +211,7 @@ public class RNNotificationsModule extends ReactContextBaseJavaModule implements
                     channelMessage.setDescription("");
                     channelMessage.enableLights(true);
                     channelMessage.setShowBadge(true);
-//                    channelMessage.setSound(, audioAttributes);
+                    channelMessage.setSound(sound, audioAttributes);
                     channelMessage.setLightColor(Color.GREEN);
                     channelMessage.setLockscreenVisibility(Notification.VISIBILITY_PRIVATE);
                     notificationManager.createNotificationChannel(channelMessage);

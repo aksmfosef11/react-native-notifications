@@ -12,6 +12,7 @@ import android.util.Log;
 
 import androidx.annotation.RequiresApi;
 
+import com.wix.reactnativenotifications.R;
 import com.wix.reactnativenotifications.utils.PreferenceHolder;
 
 import java.util.ArrayList;
@@ -50,7 +51,7 @@ public class CreateNotification {
                 channelMessage.setDescription(noData.getDescription().equals("") ? null : noData.getDescription());
                 channelMessage.enableLights(true);
                 channelMessage.setShowBadge(true);
-                channelMessage.setSound(soundUri, audioAttributes);
+                channelMessage.setSound(Uri.parse("android.resource://" + context.getPackageName() + "/" + R.raw.nagizi_sound), audioAttributes);
                 channelMessage.setLightColor(Color.GREEN);
                 channelMessage.setLockscreenVisibility(Notification.VISIBILITY_PRIVATE);
                 notificationManager.createNotificationChannel(channelMessage);
