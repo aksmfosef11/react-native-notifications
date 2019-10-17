@@ -1,14 +1,12 @@
 package com.wix.reactnativenotifications.core.notification;
 
 import android.app.Notification;
-import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
-import android.media.AudioAttributes;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
@@ -23,13 +21,16 @@ import com.wix.reactnativenotifications.core.InitialNotificationHolder;
 import com.wix.reactnativenotifications.core.JsIOHelper;
 import com.wix.reactnativenotifications.core.NotificationIntentAdapter;
 import com.wix.reactnativenotifications.core.ProxyService;
-import com.wix.reactnativenotifications.utils.PreferenceHolder;
 
 import java.util.List;
 
 import static com.wix.reactnativenotifications.Defs.NOTIFICATION_OPENED_EVENT_NAME;
 import static com.wix.reactnativenotifications.Defs.NOTIFICATION_RECEIVED_EVENT_NAME;
 import static com.wix.reactnativenotifications.Defs.NOTIFICATION_RECEIVED_FOREGROUND_EVENT_NAME;
+import static com.wix.reactnativenotifications.RNNotificationsModule.groupTalkUID;
+import static com.wix.reactnativenotifications.RNNotificationsModule.isFocusRadio;
+import static com.wix.reactnativenotifications.RNNotificationsModule.radioUID;
+import static com.wix.reactnativenotifications.RNNotificationsModule.talkUID;
 
 public class PushNotification implements IPushNotification {
     final protected Context mContext;
@@ -82,8 +83,28 @@ public class PushNotification implements IPushNotification {
     @Override
     public void onReceived() throws InvalidNotificationException {
         int alarmType = Integer.parseInt(mNotificationProps.asBundle().getString("AlarmType"));
-        NotificationData notificationData = getNotification(alarmType);
-        postNotification(null, notificationData.getId(), notificationData.getName(), alarmType);
+        boolean isPass = false;
+        if (alarmType == 6) {
+            long _talkUID = Long.parseLong(mNotificationProps.asBundle().getString("AdviceUID"));
+            if (talkUID == _talkUID) {
+                isPass = true;
+            }
+        } else if (alarmType == 41) {
+            long _talkUID = Long.parseLong(mNotificationProps.asBundle().getString("TalkUID"));
+            if (groupTalkUID == _talkUID) {
+                isPass = true;
+            }
+        } else if (alarmType == 27) {
+            long _broadUID = Long.parseLong(mNotificationProps.asBundle().getString("BroadUID"));
+            if (radioUID == _broadUID && isFocusRadio) {
+                isPass = true;
+            }
+        }
+
+        if (!isPass) {
+            NotificationData notificationData = getNotification(alarmType);
+            postNotification(null, notificationData.getId(), notificationData.getName(), alarmType);
+        }
         notifyReceivedToJS();
         if (mAppLifecycleFacade.isAppVisible()) {
             notifiyReceivedForegroundNotificationToJS();

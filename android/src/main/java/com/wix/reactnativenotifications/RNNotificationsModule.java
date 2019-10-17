@@ -43,6 +43,10 @@ import static com.wix.reactnativenotifications.Defs.LOGTAG;
 
 public class RNNotificationsModule extends ReactContextBaseJavaModule implements ActivityEventListener {
     private PreferenceHolder pref;
+    public static long talkUID = 0;
+    public static long groupTalkUID = 0;
+    public static long radioUID = 0;
+    public static boolean isFocusRadio = false;
 
     public RNNotificationsModule(Application application, ReactApplicationContext reactContext) {
         super(reactContext);
@@ -81,6 +85,26 @@ public class RNNotificationsModule extends ReactContextBaseJavaModule implements
                 notification.onOpened();
             }
         }
+    }
+
+    @ReactMethod
+    public void setRadioUID(Integer radioUID) {
+       this.radioUID = radioUID;
+    }
+
+    @ReactMethod
+    public void setTalkUID(Integer talkUID) {
+        this.talkUID = talkUID;
+    }
+
+    @ReactMethod
+    public void setGroupTalkUID(Integer groupTalkUID) {
+        this.groupTalkUID = groupTalkUID;
+    }
+
+    @ReactMethod
+    public void setIsFocusRadio(boolean isFocusRadio) {
+        this.isFocusRadio = isFocusRadio;
     }
 
     @ReactMethod
