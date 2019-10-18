@@ -18,6 +18,13 @@ public class PreferenceHolder {
     public final String N_RADIO_ID = "N_RADIO_ID";
     public final String N_OTHER_ID = "N_OTHER_ID";
 
+    public final String IS_POST_ALARM = "IS_POST_ALARM";
+    public final String IS_POST_REPLY_ALARM = "IS_POST_REPLY_ALARM";
+    public final String IS_POST_TODAK_ALARM = "IS_POST_TODAK_ALARM";
+    public final String IS_TALK_ALARM = "IS_TALK_ALARM";
+    public final String IS_RADIO_ALARM = "IS_RADIO_ALARM";
+    public final String IS_OTHER_ALARM = "IS_OTHER_ALARM";
+
 
     static Context mContext;
     public PreferenceHolder(Context c) {

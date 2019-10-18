@@ -21,6 +21,7 @@ import com.wix.reactnativenotifications.core.InitialNotificationHolder;
 import com.wix.reactnativenotifications.core.JsIOHelper;
 import com.wix.reactnativenotifications.core.NotificationIntentAdapter;
 import com.wix.reactnativenotifications.core.ProxyService;
+import com.wix.reactnativenotifications.utils.PreferenceHolder;
 
 import java.util.List;
 
@@ -39,6 +40,7 @@ public class PushNotification implements IPushNotification {
     final protected JsIOHelper mJsIOHelper;
     final protected PushNotificationProps mNotificationProps;
     final protected Bitmap largeIcon;
+    final protected PreferenceHolder pref;
     final protected AppVisibilityListener mAppVisibilityListener = new AppVisibilityListener() {
         @Override
         public void onAppVisible() {
@@ -70,6 +72,7 @@ public class PushNotification implements IPushNotification {
         mJsIOHelper = JsIOHelper;
         mNotificationProps = createProps(bundle);
         this.largeIcon = largeIcon;
+        this.pref = new PreferenceHolder(mContext);
     }
 
     private static boolean verifyNotificationBundle(Bundle bundle) {
@@ -100,14 +103,62 @@ public class PushNotification implements IPushNotification {
                 isPass = true;
             }
         }
-
         if (!isPass) {
-            NotificationData notificationData = getNotification(alarmType);
-            postNotification(null, notificationData.getId(), notificationData.getName(), alarmType);
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                NotificationData notificationData = getNotification(alarmType);
+                postNotification(null, notificationData.getId(), notificationData.getName(), alarmType);
+            }else{
+                if(isOnAlarm(alarmType)){
+                    postNotification(null, "", "", alarmType);
+                }
+            }
         }
         notifyReceivedToJS();
         if (mAppLifecycleFacade.isAppVisible()) {
             notifiyReceivedForegroundNotificationToJS();
+        }
+    }
+
+    private boolean isOnAlarm(int alarmType){
+        if(pref != null) {
+            switch (alarmType) {
+                /**내고민에 토닥토닥 했을 때**/
+                case 1:     //토닥토닥
+                    return pref.getValue(pref.IS_POST_TODAK_ALARM, true);
+                /**내고민,잡담에 답글이 달렸을 때**/
+                case 2:
+                case 16:
+                    return pref.getValue(pref.IS_POST_ALARM, true);
+                /**잡담,고민에서 내 댓글에 추천 또는 답글이 달렸을 때**/
+                case 3:
+                case 4:
+                case 17:
+                    return pref.getValue(pref.IS_POST_REPLY_ALARM, true);
+                /**고민대화 알림**/
+                case 6:
+                case 7:
+                case 9:
+                case 10:
+                case 39:
+                case 40:
+                case 41:
+                    return pref.getValue(pref.IS_TALK_ALARM, true);
+                /**고민라디오 알림**/
+                case 22:
+                case 23:
+                case 24:
+                case 26:
+                case 27:
+                case 28:
+                case 30:
+                    return pref.getValue(pref.IS_RADIO_ALARM, true);
+                /**단체대화방 알림**/
+
+                default:
+                    return pref.getValue(pref.IS_OTHER_ALARM, true);
+            }
+        }else{
+            return true;
         }
     }
 

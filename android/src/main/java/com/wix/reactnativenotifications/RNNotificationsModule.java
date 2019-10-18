@@ -27,7 +27,6 @@ import com.wix.reactnativenotifications.core.AppLifecycleFacadeHolder;
 import com.wix.reactnativenotifications.core.InitialNotificationHolder;
 import com.wix.reactnativenotifications.core.ReactAppLifecycleFacade;
 import com.wix.reactnativenotifications.core.notification.IPushNotification;
-import com.wix.reactnativenotifications.core.notification.NotificationData;
 import com.wix.reactnativenotifications.core.notification.PushNotification;
 import com.wix.reactnativenotifications.core.notification.PushNotificationProps;
 import com.wix.reactnativenotifications.core.notificationdrawer.IPushNotificationsDrawer;
@@ -35,8 +34,6 @@ import com.wix.reactnativenotifications.core.notificationdrawer.PushNotification
 import com.wix.reactnativenotifications.gcm.FcmInstanceIdRefreshHandlerService;
 import com.wix.reactnativenotifications.utils.PreferenceHolder;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.UUID;
 
 import static com.wix.reactnativenotifications.Defs.LOGTAG;
@@ -89,7 +86,7 @@ public class RNNotificationsModule extends ReactContextBaseJavaModule implements
 
     @ReactMethod
     public void setRadioUID(Integer radioUID) {
-       this.radioUID = radioUID;
+        this.radioUID = radioUID;
     }
 
     @ReactMethod
@@ -178,7 +175,7 @@ public class RNNotificationsModule extends ReactContextBaseJavaModule implements
                     break;
                 case "N_POST_REPLY_ID":
                     pref.put(pref.N_POST_REPLY_ID, uuid);
-                    channelMessage = new NotificationChannel(uuid, "내 댓글 알림",isAlarm ? NotificationManager.IMPORTANCE_HIGH : NotificationManager.IMPORTANCE_NONE);
+                    channelMessage = new NotificationChannel(uuid, "내 댓글 알림", isAlarm ? NotificationManager.IMPORTANCE_HIGH : NotificationManager.IMPORTANCE_NONE);
                     channelMessage.enableVibration(false);
                     channelMessage.setDescription("내 댓글에 달린 답글에 대한 알림을 받습니다.");
                     channelMessage.enableLights(true);
@@ -191,7 +188,7 @@ public class RNNotificationsModule extends ReactContextBaseJavaModule implements
 
                 case "N_POST_TODAK_ID":
                     pref.put(pref.N_POST_TODAK_ID, uuid);
-                    channelMessage = new NotificationChannel(uuid, "토닥토닥 알림",isAlarm ? NotificationManager.IMPORTANCE_HIGH : NotificationManager.IMPORTANCE_NONE);
+                    channelMessage = new NotificationChannel(uuid, "토닥토닥 알림", isAlarm ? NotificationManager.IMPORTANCE_HIGH : NotificationManager.IMPORTANCE_NONE);
                     channelMessage.enableVibration(false);
                     channelMessage.setDescription("내 고민글이 토닥토닥을 받았을 때 알림을 받습니다.");
                     channelMessage.enableLights(true);
@@ -244,14 +241,35 @@ public class RNNotificationsModule extends ReactContextBaseJavaModule implements
                     break;
             }
         } else {
-
+            switch (alarmType) {
+                case "N_POST_CONTENT_ID":
+                    pref.put(pref.IS_POST_ALARM, isAlarm);
+                    break;
+                case "N_POST_REPLY_ID":
+                    pref.put(pref.IS_POST_REPLY_ALARM, isAlarm);
+                    break;
+                case "N_POST_TODAK_ID":
+                    pref.put(pref.IS_POST_TODAK_ALARM, isAlarm);
+                    break;
+                case "N_TALK_ID":
+                    pref.put(pref.IS_TALK_ALARM, isAlarm);
+                    break;
+                case "N_RADIO_ID":
+                    pref.put(pref.IS_RADIO_ALARM, isAlarm);
+                    break;
+                case "N_OTHER_ID":
+                    pref.put(pref.IS_OTHER_ALARM, isAlarm);
+                    break;
+                default:
+                    break;
+            }
         }
     }
 
-    protected void startGcmIntentService(String extraFlag) {
-        final Context appContext = getReactApplicationContext().getApplicationContext();
-        final Intent tokenFetchIntent = new Intent(appContext, FcmInstanceIdRefreshHandlerService.class);
-        tokenFetchIntent.putExtra(extraFlag, true);
-        appContext.startService(tokenFetchIntent);
+        protected void startGcmIntentService (String extraFlag){
+            final Context appContext = getReactApplicationContext().getApplicationContext();
+            final Intent tokenFetchIntent = new Intent(appContext, FcmInstanceIdRefreshHandlerService.class);
+            tokenFetchIntent.putExtra(extraFlag, true);
+            appContext.startService(tokenFetchIntent);
+        }
     }
-}
