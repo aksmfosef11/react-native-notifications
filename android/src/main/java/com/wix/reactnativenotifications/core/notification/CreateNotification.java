@@ -42,11 +42,7 @@ public class CreateNotification {
                     .build();
             for (NotificationData noData : notificationData) {
                 NotificationChannel channelMessage;
-                if (noData.getId().equals(pref.getValue(pref.N_OTHER_ID,""))) {
-                    channelMessage = new NotificationChannel(noData.getId(), noData.getName(), NotificationManager.IMPORTANCE_LOW);
-                } else {
-                    channelMessage = new NotificationChannel(noData.getId(), noData.getName(), NotificationManager.IMPORTANCE_HIGH);
-                }
+                channelMessage = new NotificationChannel(noData.getId(), noData.getName(), NotificationManager.IMPORTANCE_HIGH);
                 channelMessage.enableVibration(false);
                 channelMessage.setDescription(noData.getDescription().equals("") ? null : noData.getDescription());
                 channelMessage.enableLights(true);
