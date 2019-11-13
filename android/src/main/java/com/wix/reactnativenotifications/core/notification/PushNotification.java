@@ -7,12 +7,17 @@ import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
+import android.media.AudioAttributes;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.util.Log;
 
+import androidx.annotation.RequiresApi;
+import androidx.core.app.NotificationCompat;
+
 import com.facebook.react.bridge.ReactContext;
+import com.wix.reactnativenotifications.R;
 import com.wix.reactnativenotifications.core.AppLaunchHelper;
 import com.wix.reactnativenotifications.core.AppLifecycleFacade;
 import com.wix.reactnativenotifications.core.AppLifecycleFacade.AppVisibilityListener;
@@ -277,7 +282,12 @@ public class PushNotification implements IPushNotification {
     }
 
     protected Notification buildNotification(PendingIntent intent, String channelID, String channelName, int alarmType) {
-        return getNotificationBuilder(intent, channelID, channelName, alarmType).build();
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            return getNotificationBuilder(intent, channelID, channelName, alarmType).build();
+        }else{
+            return getNotificationBuilderMin(intent, channelID, channelName, alarmType).build();
+        }
+
     }
 
     protected Uri getSoundUri() {
@@ -288,6 +298,7 @@ public class PushNotification implements IPushNotification {
         return mContext.getResources().getIdentifier("fcm_top_bar_icon", "drawable", mContext.getPackageName());
     }
 
+    @RequiresApi(api = Build.VERSION_CODES.O)
     protected Notification.Builder getNotificationBuilder(PendingIntent intent, String CHANNEL_ID, String CHANNEL_NAME, int alarmType) {
         final Notification.Builder notification = new Notification.Builder(mContext)
                 .setContentTitle(mNotificationProps.getTitle())
@@ -295,12 +306,22 @@ public class PushNotification implements IPushNotification {
                 .setSmallIcon(getIcon())
                 .setLargeIcon(largeIcon)
                 .setContentIntent(intent)
+                .setChannelId(CHANNEL_ID)
                 .setDefaults(Notification.DEFAULT_ALL)
                 .setAutoCancel(true);
+        return notification;
+    }
 
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            notification.setChannelId(CHANNEL_ID);
-        }
+    protected NotificationCompat.Builder getNotificationBuilderMin(PendingIntent intent, String CHANNEL_ID, String CHANNEL_NAME, int alarmType) {
+        final NotificationCompat.Builder notification = new NotificationCompat.Builder(mContext)
+                .setContentTitle(mNotificationProps.getTitle())
+                .setContentText(mNotificationProps.getContent())
+                .setSmallIcon(getIcon())
+                .setLargeIcon(largeIcon)
+                .setContentIntent(intent)
+                .setSound(Uri.parse("android.resource://" + mContext.getPackageName() + "/" + R.raw.nagizi_sound))
+//                .setDefaults(Notification.DEFAULT_VIBRATE)
+                .setAutoCancel(true);
         return notification;
     }
 
