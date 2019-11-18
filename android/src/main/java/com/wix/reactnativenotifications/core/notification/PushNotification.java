@@ -7,7 +7,6 @@ import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
-import android.media.AudioAttributes;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
@@ -109,12 +108,13 @@ public class PushNotification implements IPushNotification {
             }
         }
         if (!isPass) {
+            Integer notificitionId = getNotificationId(alarmType);
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
                 NotificationData notificationData = getNotification(alarmType);
-                postNotification(null, notificationData.getId(), notificationData.getName(), alarmType);
-            }else{
-                if(isOnAlarm(alarmType)){
-                    postNotification(null, "", "", alarmType);
+                postNotification(notificitionId, notificationData.getId(), notificationData.getName(), alarmType);
+            } else {
+                if (isOnAlarm(alarmType)) {
+                    postNotification(notificitionId, "", "", alarmType);
                 }
             }
         }
@@ -124,45 +124,82 @@ public class PushNotification implements IPushNotification {
         }
     }
 
-    private boolean isOnAlarm(int alarmType){
-        if(pref != null) {
+    private Integer getNotificationId(int alarmType) {
+        if (pref != null) {
+            Integer notificationId = null;
             switch (alarmType) {
                 /**내고민에 토닥토닥 했을 때**/
                 case 1:     //토닥토닥
-                    return pref.getValue(pref.IS_POST_TODAK_ALARM, true);
+                    notificationId = Integer.parseInt(alarmType + mNotificationProps.asBundle().getString("WorryUID") + "");
+                    return notificationId;
                 /**내고민,잡담에 답글이 달렸을 때**/
                 case 2:
+                    notificationId = Integer.parseInt(alarmType + mNotificationProps.asBundle().getString("WorryUID") + "");
+                    return notificationId;
                 case 16:
-                    return pref.getValue(pref.IS_POST_ALARM, true);
+                    notificationId = Integer.parseInt(alarmType + mNotificationProps.asBundle().getString("StoryUID") + "");
+                    return notificationId;
                 /**잡담,고민에서 내 댓글에 추천 또는 답글이 달렸을 때**/
                 case 3:
                 case 4:
+                    notificationId = Integer.parseInt(alarmType + mNotificationProps.asBundle().getString("WorryUID") + "");
+                    return notificationId;
                 case 17:
-                    return pref.getValue(pref.IS_POST_REPLY_ALARM, true);
+                    notificationId = Integer.parseInt(alarmType + mNotificationProps.asBundle().getString("StoryUID") + "");
+                    return notificationId;
                 /**고민대화 알림**/
                 case 6:
-                case 7:
-                case 9:
-                case 10:
-                case 39:
-                case 40:
+                    notificationId = Integer.parseInt(alarmType + mNotificationProps.asBundle().getString("AdviceUID") + "");
+                    return notificationId;
                 case 41:
+                    notificationId = Integer.parseInt(alarmType + mNotificationProps.asBundle().getString("TalkUID") + "");
+                    return notificationId;
+                default:
+                    return notificationId;
+            }
+        } else {
+            return null;
+        }
+    }
+
+    private boolean isOnAlarm(int alarmType) {
+        if (pref != null) {
+            switch (alarmType) {
+                /**내고민에 토닥토닥 했을 때**/
+                case 1:     //고민글에 토닥토닥 받았어요
+                    return pref.getValue(pref.IS_POST_TODAK_ALARM, true);
+                case 2:         //고민글에 댓글이 달렸어요
+                case 16:        //잡담글에 댓글이 달렸어요.
+                    return pref.getValue(pref.IS_POST_ALARM, true);
+                /**잡담,고민에서 내 댓글에 추천 또는 답글이 달렸을 때**/
+                case 3:     //고민 댓글에 고마워했어요.
+                case 4:     //내 고민글에 댓글이 달렸어요.
+                case 17:        //잡담글에 답글이 달렸어요.
+                    return pref.getValue(pref.IS_POST_REPLY_ALARM, true);
+                /**고민대화 알림**/
+                case 6:         //1:1고민대화 메시지가 왔어요.
+                case 7:         //1:1 고민대화가 종료되었어요.
+                case 9:         //1:1 고민대화 후원을 받았어요.
+                case 10:        //1:1 고민대화 리뷰가 달렸어요.
+                case 39:            //리뷰에 메이트가 답글을 달았어요.
+                case 40:            //하트 적립 완료
+                case 41:            //단체대화 메시지
                     return pref.getValue(pref.IS_TALK_ALARM, true);
                 /**고민라디오 알림**/
-                case 22:
-                case 23:
-                case 24:
-                case 26:
-                case 27:
-                case 28:
-                case 30:
+                case 22:            //라디오가 종료되었어요.
+                case 23:            //라디오를 시작했어요.
+                case 24:            //누군가가 나를 즐겨찾기했어요.
+                case 26:            //내 고민글이 라디오에 소개되었어요.
+                case 27:            //내 사연이 소개되었어요.
+                case 28:            //라디오 상태변경
+                case 30:            //라디오 후원을 받았어요.
                     return pref.getValue(pref.IS_RADIO_ALARM, true);
                 /**단체대화방 알림**/
 
                 default:
                     return pref.getValue(pref.IS_OTHER_ALARM, true);
             }
-        }else{
+        } else {
             return true;
         }
     }
@@ -284,7 +321,7 @@ public class PushNotification implements IPushNotification {
     protected Notification buildNotification(PendingIntent intent, String channelID, String channelName, int alarmType) {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             return getNotificationBuilder(intent, channelID, channelName, alarmType).build();
-        }else{
+        } else {
             return getNotificationBuilderMin(intent, channelID, channelName, alarmType).build();
         }
 

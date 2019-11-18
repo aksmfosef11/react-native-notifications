@@ -17,12 +17,12 @@ public class JsIOHelper {
     }
 
     public boolean sendEventToJS(String eventName, WritableMap data, ReactContext reactContext) {
-        try{
-        if (reactContext != null) {
-            reactContext.getJSModule(DeviceEventManagerModule.RCTDeviceEventEmitter.class).emit(eventName, data);
-            return true;
-        }
-        return false;
+        try {
+            if (reactContext != null) {
+                reactContext.getJSModule(DeviceEventManagerModule.RCTDeviceEventEmitter.class).emit(eventName, data);
+                return true;
+            }
+            return false;
         }catch(Exception e){
             return false;
         }
