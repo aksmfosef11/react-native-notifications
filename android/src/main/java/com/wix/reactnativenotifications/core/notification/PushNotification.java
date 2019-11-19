@@ -346,7 +346,6 @@ public class PushNotification implements IPushNotification {
                 .setChannelId(CHANNEL_ID)
                 .setWhen(System.currentTimeMillis())
                 .setShowWhen(true)
-                .setDefaults(Notification.DEFAULT_ALL)
                 .setAutoCancel(true);
         return notification;
     }
