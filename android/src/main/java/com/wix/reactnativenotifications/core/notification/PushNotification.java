@@ -344,6 +344,8 @@ public class PushNotification implements IPushNotification {
                 .setLargeIcon(largeIcon)
                 .setContentIntent(intent)
                 .setChannelId(CHANNEL_ID)
+                .setWhen(System.currentTimeMillis())
+                .setShowWhen(true)
                 .setDefaults(Notification.DEFAULT_ALL)
                 .setAutoCancel(true);
         return notification;
@@ -353,6 +355,8 @@ public class PushNotification implements IPushNotification {
         final NotificationCompat.Builder notification = new NotificationCompat.Builder(mContext)
                 .setContentTitle(mNotificationProps.getTitle())
                 .setContentText(mNotificationProps.getContent())
+                .setWhen(System.currentTimeMillis())
+                .setShowWhen(true)
                 .setSmallIcon(getIcon())
                 .setLargeIcon(largeIcon)
                 .setContentIntent(intent)
