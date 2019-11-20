@@ -267,9 +267,13 @@ public class RNNotificationsModule extends ReactContextBaseJavaModule implements
     }
 
         protected void startGcmIntentService (String extraFlag){
+        try {
             final Context appContext = getReactApplicationContext().getApplicationContext();
             final Intent tokenFetchIntent = new Intent(appContext, FcmInstanceIdRefreshHandlerService.class);
             tokenFetchIntent.putExtra(extraFlag, true);
             appContext.startService(tokenFetchIntent);
+        }catch (IllegalStateException e){
+            e.printStackTrace();
+        }
         }
     }
