@@ -157,7 +157,7 @@ public class RNNotificationsModule extends ReactContextBaseJavaModule implements
             NotificationChannel channelMessage;
             AudioAttributes audioAttributes = new AudioAttributes.Builder()
                     .setContentType(AudioAttributes.CONTENT_TYPE_SONIFICATION)
-                    .setUsage(AudioAttributes.USAGE_NOTIFICATION_RINGTONE)
+                    .setUsage(AudioAttributes.USAGE_NOTIFICATION_COMMUNICATION_INSTANT)
                     .build();
             Uri sound = Uri.parse("android.resource://" + getReactApplicationContext().getPackageName() + "/" + R.raw.nagizi_sound);
             switch (alarmType) {
