@@ -141,6 +141,11 @@ public class RNNotificationsModule extends ReactContextBaseJavaModule implements
         notificationsDrawer.onNotificationClearRequest(notificationId);
     }
 
+    @ReactMethod void removeAllDeliveredNotifications() {
+        IPushNotificationsDrawer notificationsDrawer = PushNotificationsDrawer.get(getReactApplicationContext().getApplicationContext());
+        notificationsDrawer.onAllNotificationsClearRequest();
+    }
+
     @ReactMethod
     public void isRegisteredForRemoteNotifications(Promise promise) {
         boolean hasPermission = NotificationManagerCompat.from(getReactApplicationContext()).areNotificationsEnabled();
@@ -157,7 +162,7 @@ public class RNNotificationsModule extends ReactContextBaseJavaModule implements
             NotificationChannel channelMessage;
             AudioAttributes audioAttributes = new AudioAttributes.Builder()
                     .setContentType(AudioAttributes.CONTENT_TYPE_SONIFICATION)
-                    .setUsage(AudioAttributes.USAGE_NOTIFICATION_COMMUNICATION_INSTANT)
+                    .setUsage(AudioAttributes.USAGE_NOTIFICATION_RINGTONE)
                     .build();
             Uri sound = Uri.parse("android.resource://" + getReactApplicationContext().getPackageName() + "/" + R.raw.nagizi_sound);
             switch (alarmType) {

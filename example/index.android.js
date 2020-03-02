@@ -150,6 +150,10 @@ class MainComponent extends Component {
     this.setState({lastNotification: notification.getData(), notificationRxTime: this.state.elapsed});
   }
 
+  removeAllDeliveredNotifications() {
+    NotificationsAndroid.removeAllDeliveredNotifications();
+  }
+
   onNotificationReceived(notification) {
     console.log("onNotificationReceived: ", notification);
   }
